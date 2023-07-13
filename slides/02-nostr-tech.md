@@ -5,8 +5,6 @@ theme: internal
 
 # Intro to Nostr Development
 
-<br /><br /><br /><br /><br /><br /><br /><br /><br />
-
 ---
 
 # What is a Nostr Note?
@@ -55,48 +53,11 @@ Most relays will respond with an `OK` message with success or errors.
 
 ---
 
-# Importing a Crypto Library
+# Note ID
 
-Nostr requires a few cryptography tools. 
+The `id` is a cryptographic hash that commits to the message details:
 
-The `@noble` suite of crypto libraries is easy to use and well audited:
-
-```js
-// Import into a nodejs project.
-import { sha256 }  from '@noble/hashes/sha256'
-import { schnorr } from '@noble/curves/secp256k1'
-const { sign, verify } = schnorr
-```
-
-We need the `sha256`, `sign` and `verify` methods for authenticating a nostr note.
-
-Credit to Paul Miller: https://github.com/paulmillr
-
----
-
-# Importing a Crypto Library (in the browser)
-
-There may be import issues with using `@noble` in the browser.
-
-This wrapper library works both in the browser and nodejs:
-
-```html
-<!-- Import into a browser project. -->
-<script src="https://unpkg.com/@cmdcode/crypto-utils"></script>
-<script>
-  const { sha256, sign, verify } = window.cryptoUtils
-</script>
-```
-
-It still uses the `@noble` library suite under the hood!
-
-(there may still be issues with using safari)
-
----
-
-# Nostr Note ID
-
-The Note ID is a sha256 hash that commits to the message details:
+</br>
 
 ```js
 const preimg = [
@@ -107,14 +68,7 @@ const preimg = [
   event['tags'],        // Metadata tags for the note.
   event['content'],     // Content of the note.
 ]
-
-const str   = JSON.stringify(preimg)  // Convert JSON to string.
-const bytes = strToBytes(str)         // Convert string to bytes.
-const hash  = sha256(bytes)           // Hash bytes using sha256.
-const id    = bytesToHex(hash)        // Convert bytes to hex.
 ```
-
-There are examples of `strToBytes` and `bytesToHex` methods in the next course.
 
 ---
 
@@ -123,14 +77,13 @@ There are examples of `strToBytes` and `bytesToHex` methods in the next course.
 The signature is produced by signing the Note ID with your secret key.
 
 ```js
-const sig = sign(seckey, id)
+const sig = schnorr.sign(seckey, id)
 ```
 
-Any client can verify your note by checking the signature, ID, and public key.
+Any client can verify your note by checking the signature, id, and public key.
 
 ```js
-const isValid = verify(sig, id, pubkey)
-console.log('Note is valid:', isValid)
+const isValid = schnorr.verify(sig, id, pubkey)
 ```
 
 ---
@@ -138,8 +91,7 @@ console.log('Note is valid:', isValid)
 # What is a Relay?
 
 * A relay is a websocket server that stores notes and manages subscriptions.
-* You can use any database to store notes (SQL, Mongo, Redis, Graph, etc).
-* The filter options for requesting a subscription is intentionally limited.
+* A relay can use any kind of database to store notes.
 * A relay can also run as 'forward-only' and not store any persistent data.
 
 ---
@@ -149,8 +101,7 @@ console.log('Note is valid:', isValid)
 A filter is used to subscribe to a feed of notes stored on a relay.
 
 ```js
-// Note timestamps are in seconds, 
-// so we need to divide out milliseconds.
+// Note timestamps are stored in seconds, so we need to factor out milliseconds.
 const now = Math.floor(Date.now() / 1000)
 
 const filter = {
@@ -160,7 +111,7 @@ const filter = {
 }
 ```
 
-When requesting a back-log of notes, relays will typically enforce a limit of 100 notes per query. You can use the `since` and `until` options to paginate your queries.
+When requesting a back-log of notes, relays typically enforce a limit of 100 notes per query. You can use `since` and `until` keywords to paginate your queries.
 
 ---
 
@@ -238,17 +189,6 @@ A web tool for checking / validating nostr events:
 https://nak.nostr.com
 
 </div>
-
----
-
-# Review
-
-* What a Nostr Note is.
-* How to use the cryptography behind Nostr.
-* What a Relay is.
-* How to subscribe to events.
-* The original specification and NIP.
-* Resources to build on Nostr.
 
 ---
 
