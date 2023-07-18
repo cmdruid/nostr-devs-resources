@@ -1,4 +1,4 @@
-# Nostr Workshop
+# Nostr Workshop Introduction Video
 
 This repository contains resources for the introduction video of the Nostr Devs course.
 
